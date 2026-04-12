@@ -1,3 +1,3 @@
 # AI-Resume-Analyzer
-I have added webhook trigger 
+I have added webhook trigger. 
 When something is pushed jenkins is triggered.
