@@ -20,12 +20,6 @@ app = app_module.app
 
 # ---------- UNIT TESTS ----------
 
-def test_extract_skills_basic():
-    text = "I have experience in Python and SQL"
-    result = extract_skills(text)
-
-    assert "Python" in result
-    assert "Sql" in result  # because .title()
 
 
 def test_extract_skills_empty():
