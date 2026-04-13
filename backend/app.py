@@ -16,7 +16,10 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 # ----------- HOME ROUTE -----------
 @app.route('/')
 def home():
-    return "Resume Analyzer Running", 200
+    file_path = os.path.join(FRONTEND_DIR, 'index.html')
+    if os.path.exists(file_path):
+        return send_from_directory(FRONTEND_DIR, 'index.html')
+    return "OK", 200
 
 
 # ----------- PDF TEXT EXTRACTION -----------
@@ -93,7 +96,7 @@ def upload():
 
 # ----------- RUN APP -----------
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host='0.0.0.0', port=5000, debug=True)
 # from flask import Flask, request, jsonify, send_from_directory
 # from flask_cors import CORS
 # import os
