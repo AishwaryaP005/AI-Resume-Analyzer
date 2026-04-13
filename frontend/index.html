@@ -3,57 +3,139 @@
 <head>
   <meta charset="UTF-8" />
   <title>AI Resume Analyzer</title>
+
   <style>
-    body { font-family: Arial, sans-serif; max-width: 600px; margin: 40px auto; padding: 20px; }
-    h1   { color: #343; }
-    button { padding: 10px 20px; background: #007bff; color: white; border: none; cursor: pointer; border-radius: 5px; }
-    button:hover { background: #0056b3; }
-    #result { margin-top: 20px; background: #f4f4f4; padding: 15px; border-radius: 8px; display: none; }
-    .tag { display: inline-block; background: #28a745; color: white; padding: 4px 10px;
-           border-radius: 12px; margin: 4px; font-size: 14px; }
-    .job { display: inline-block; background: #007bff; color: white; padding: 4px 10px;
-           border-radius: 12px; margin: 4px; font-size: 14px; }
-    .error { color: red; }
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      margin: 0;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .container {
+      background: white;
+      padding: 30px;
+      border-radius: 15px;
+      width: 400px;
+      text-align: center;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+    }
+
+    h1 {
+      margin-bottom: 10px;
+    }
+
+    p {
+      color: #666;
+      font-size: 14px;
+    }
+
+    input {
+      margin-top: 15px;
+    }
+
+    button {
+      margin-top: 20px;
+      padding: 10px 20px;
+      background: #667eea;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      width: 100%;
+      font-size: 16px;
+    }
+
+    button:hover {
+      background: #5a67d8;
+    }
+
+    #loading {
+      display: none;
+      margin-top: 10px;
+      color: #555;
+    }
+
+    #result {
+      margin-top: 20px;
+      display: none;
+      text-align: left;
+    }
+
+    .tag, .job {
+      display: inline-block;
+      padding: 6px 10px;
+      border-radius: 20px;
+      margin: 5px 5px 0 0;
+      font-size: 13px;
+      color: white;
+    }
+
+    .tag { background: #28a745; }
+    .job { background: #007bff; }
+
+    .error {
+      color: red;
+      margin-top: 10px;
+    }
+
+    .filename {
+      font-weight: bold;
+      color: #333;
+    }
+
   </style>
 </head>
+
 <body>
 
-  <h1>📄 AI Resume Analyzer</h1>
-  <p>Upload your resume (PDF) to get skill analysis and job recommendations.</p>
+  <div class="container">
 
-  <input type="file" id="resumeFile" accept=".pdf" />
-  <br/><br/>
-  <button onclick="uploadResume()">Analyze Resume</button>
+    <h1>📄 Resume Analyzer</h1>
+    <p>Upload your resume to get AI-powered insights</p>
 
-  <div id="result">
-    <h3>✅ Results</h3>
-    <p><strong>File:</strong> <span id="filename"></span></p>
+    <input type="file" id="resumeFile" accept=".pdf" />
+    
+    <button id="analyzeBtn" onclick="uploadResume()">Analyze Resume</button>
 
-    <p><strong>Skills Found:</strong></p>
-    <div id="skills"></div>
+    <div id="loading">⏳ Analyzing...</div>
 
-    <p><strong>Recommended Jobs:</strong></p>
-    <div id="jobs"></div>
+    <div id="result">
+      <p>📁 <span class="filename" id="filename"></span></p>
+
+      <p><strong>Skills:</strong></p>
+      <div id="skills"></div>
+
+      <p><strong>Recommended Jobs:</strong></p>
+      <div id="jobs"></div>
+    </div>
+
+    <p id="error" class="error"></p>
+
   </div>
-
-  <p id="error" class="error"></p>
 
   <script>
     async function uploadResume() {
       const fileInput = document.getElementById("resumeFile");
       const errorEl   = document.getElementById("error");
       const resultEl  = document.getElementById("result");
+      const loadingEl = document.getElementById("loading");
 
       errorEl.textContent = "";
       resultEl.style.display = "none";
 
       if (!fileInput.files.length) {
-        errorEl.textContent = "Please select a PDF file first.";
+        errorEl.textContent = "Please select a PDF file.";
         return;
       }
 
       const formData = new FormData();
       formData.append("resume", fileInput.files[0]);
+
+      loadingEl.style.display = "block";
 
       try {
         const response = await fetch("http://127.0.0.1:5000/upload", {
@@ -62,30 +144,30 @@
         });
 
         const data = await response.json();
+        loadingEl.style.display = "none";
 
         if (!response.ok) {
-          errorEl.textContent = "Error: " + (data.error || "Unknown error");
+          errorEl.textContent = data.error || "Something went wrong";
           return;
         }
 
         document.getElementById("filename").textContent = data.filename;
 
-        // Render skills
-        const skillsDiv = document.getElementById("skills");
-        skillsDiv.innerHTML = data.skills_found.length
-          ? data.skills_found.map(s => `<span class="tag">${s}</span>`).join("")
-          : "<em>No skills detected</em>";
+        document.getElementById("skills").innerHTML =
+          data.skills_found.length
+            ? data.skills_found.map(s => `<span class="tag">${s}</span>`).join("")
+            : "<em>No skills found</em>";
 
-        // Render jobs
-        const jobsDiv = document.getElementById("jobs");
-        jobsDiv.innerHTML = data.recommended_jobs.length
-          ? data.recommended_jobs.map(j => `<span class="job">${j}</span>`).join("")
-          : "<em>No job recommendations</em>";
+        document.getElementById("jobs").innerHTML =
+          data.recommended_jobs.length
+            ? data.recommended_jobs.map(j => `<span class="job">${j}</span>`).join("")
+            : "<em>No jobs found</em>";
 
         resultEl.style.display = "block";
 
       } catch (err) {
-        errorEl.textContent = "Could not connect to server. Make sure Flask is running.";
+        loadingEl.style.display = "none";
+        errorEl.textContent = "Server error. Make sure backend is running.";
       }
     }
   </script>
