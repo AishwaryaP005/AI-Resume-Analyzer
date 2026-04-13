@@ -35,21 +35,34 @@ def extract_text(filepath):
 
 # ----------- SKILL DETECTION -----------
 def extract_skills(text):
-    skills_db = [
-        "python", "machine learning", "sql", "flask",
-        "html", "css", "javascript", "react",
-        "java", "c++", "data analysis"
-    ]
+    text = text.lower()
 
-    found_skills = []
+    skills = []
 
-    text = text.lower()  # ensure case consistency
+    if "python" in text:
+        skills.append("Python")
+    if "sql" in text:
+        skills.append("SQL")
+    if "machine learning" in text:
+        skills.append("Machine Learning")
+    if "flask" in text:
+        skills.append("Flask")
+    if "html" in text:
+        skills.append("Html")
+    if "css" in text:
+        skills.append("Css")
+    if "javascript" in text:
+        skills.append("Javascript")
+    if "react" in text:
+        skills.append("React")
+    if "java" in text:
+        skills.append("Java")
+    if "c++" in text:
+        skills.append("C++")
+    if "data analysis" in text:
+        skills.append("Data Analysis")
 
-    for skill in skills_db:
-        if skill in text:
-            found_skills.append(skill.capitalize() if skill != "c++" else "C++")
-
-    return found_skills
+    return skills
 
 
 # ----------- JOB RECOMMENDATION -----------
