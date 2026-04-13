@@ -43,10 +43,10 @@ def extract_skills(text):
 
     found_skills = []
 
-    text = text.lower()  # ensure case consistency
+    text = text.lower()
 
     for skill in skills_db:
-        if skill in text:
+        if skill.lower() in text:
             found_skills.append(skill.title() if skill != "c++" else "C++")
 
     return found_skills
