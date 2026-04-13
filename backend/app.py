@@ -16,10 +16,10 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 # ----------- HOME ROUTE -----------
 @app.route('/')
 def home():
-    file_path = os.path.join(FRONTEND_DIR, 'index.html')
-    if not os.path.exists(file_path):
-        return "Frontend not found", 404
-    return send_from_directory(FRONTEND_DIR, 'index.html')
+    try:
+        return send_from_directory(FRONTEND_DIR, 'index.html')
+    except:
+        return "Frontend not found", 200
 
 
 # ----------- PDF TEXT EXTRACTION -----------
