@@ -16,7 +16,8 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 # ----------- HOME ROUTE -----------
 @app.route('/')
 def home():
-    return send_from_directory(FRONTEND_DIR, 'test.html')
+    # FIX: use correct file name
+    return send_from_directory(FRONTEND_DIR, 'index.html')
 
 
 # ----------- PDF TEXT EXTRACTION -----------
@@ -40,9 +41,11 @@ def extract_skills(text):
 
     found_skills = []
 
+    text = text.lower()  # ensure case consistency
+
     for skill in skills_db:
         if skill in text:
-            found_skills.append(skill.title())
+            found_skills.append(skill.capitalize() if skill != "c++" else "C++")
 
     return found_skills
 
@@ -74,17 +77,11 @@ def upload():
     if file.filename == '':
         return jsonify({"error": "Empty file"}), 400
 
-    # Save file
     filepath = os.path.join(UPLOAD_FOLDER, file.filename)
     file.save(filepath)
 
-    # Extract text
     text = extract_text(filepath)
-
-    # Extract skills
     skills = extract_skills(text)
-
-    # Recommend jobs
     jobs = recommend_jobs(skills)
 
     return jsonify({
