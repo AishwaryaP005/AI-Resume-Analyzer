@@ -1,21 +1,31 @@
 import sys
 import os
-import importlib
-import backend.app
-importlib.reload(backend.app)
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-
-from backend.app import extract_skills, recommend_jobs, app
+import importlib.util
 import pytest
 
-# --- Unit Tests ---
+# ---------- FORCE CORRECT IMPORT ----------
+BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+
+spec = importlib.util.spec_from_file_location(
+    "app_module",
+    os.path.join(BASE_DIR, "backend", "app.py")
+)
+app_module = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(app_module)
+
+extract_skills = app_module.extract_skills
+recommend_jobs = app_module.recommend_jobs
+app = app_module.app
+
+
+# ---------- UNIT TESTS ----------
 
 def test_extract_skills_basic():
     text = "I have experience in Python and SQL"
     result = extract_skills(text)
 
     assert "Python" in result
-    assert "Sql" in result  # because .title() → Sql
+    assert "Sql" in result  # because .title()
 
 
 def test_extract_skills_empty():
@@ -48,7 +58,7 @@ def test_recommend_jobs_empty():
     assert "Software Engineer" in result
 
 
-# --- API Tests ---
+# ---------- API TESTS ----------
 
 @pytest.fixture
 def client():
