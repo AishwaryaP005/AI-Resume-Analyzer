@@ -1,7 +1,9 @@
 import sys
 import os
-
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+import importlib
+import backend.app
+importlib.reload(backend.app)
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from backend.app import extract_skills, recommend_jobs, app
 import pytest
