@@ -1,79 +1,99 @@
-from flask import Flask, request, jsonify, render_template_string
-import PyPDF2
-import io
-
+from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
+import os
+import PyPDF2
 
 app = Flask(__name__)
 CORS(app)
 
-# --- Skill & Job Data ---
-SKILLS = ["python", "java", "sql", "html", "css", "javascript", "machine learning", "excel", "django", "react"]
+# ----------- PATH SETUP -----------
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+UPLOAD_FOLDER = os.path.join(BASE_DIR, "uploads")
+FRONTEND_DIR = os.path.join(BASE_DIR, "..", "frontend")
 
-JOBS = {
-    "python":           ["Backend Developer", "Data Scientist", "ML Engineer"],
-    "java":             ["Software Engineer", "Android Developer"],
-    "sql":              ["Database Administrator", "Data Analyst"],
-    "html":             ["Frontend Developer", "Web Designer"],
-    "css":              ["Frontend Developer", "UI Designer"],
-    "javascript":       ["Frontend Developer", "Full Stack Developer"],
-    "machine learning": ["ML Engineer", "AI Researcher"],
-    "excel":            ["Business Analyst", "Data Analyst"],
-    "django":           ["Backend Developer", "Full Stack Developer"],
-    "react":            ["Frontend Developer", "Full Stack Developer"],
-}
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
-# --- Helper Functions ---
-def extract_text_from_pdf(file_bytes):
-    """Extract text from uploaded PDF bytes."""
-    reader = PyPDF2.PdfReader(io.BytesIO(file_bytes))
-    text = ""
-    for page in reader.pages:
-        text += page.extract_text() or ""
-    return text
-
-def extract_skills(text):
-    """Return list of matched skills from text."""
-    text_lower = text.lower()
-    return [skill for skill in SKILLS if skill in text_lower]
-
-def recommend_jobs(skills):
-    """Return unique job recommendations based on skills."""
-    result = []
-    for skill in skills:
-        if skill in JOBS:
-            result.extend(JOBS[skill])
-    return list(set(result))  # remove duplicates
-
-# --- Routes ---
-@app.route("/")
+# ----------- HOME ROUTE -----------
+@app.route('/')
 def home():
-    return "<h2>Resume Analyzer API is running ✅</h2>"
+    return send_from_directory(FRONTEND_DIR, 'test.html')
 
-@app.route("/upload", methods=["POST"])
+
+# ----------- PDF TEXT EXTRACTION -----------
+def extract_text(filepath):
+    text = ""
+    with open(filepath, "rb") as f:
+        reader = PyPDF2.PdfReader(f)
+        for page in reader.pages:
+            if page.extract_text():
+                text += page.extract_text()
+    return text.lower()
+
+
+# ----------- SKILL DETECTION -----------
+def extract_skills(text):
+    skills_db = [
+        "python", "machine learning", "sql", "flask",
+        "html", "css", "javascript", "react",
+        "java", "c++", "data analysis"
+    ]
+
+    found_skills = []
+
+    for skill in skills_db:
+        if skill in text:
+            found_skills.append(skill.title())
+
+    return found_skills
+
+
+# ----------- JOB RECOMMENDATION -----------
+def recommend_jobs(skills):
+    skills_lower = [s.lower() for s in skills]
+
+    if "machine learning" in skills_lower:
+        return ["Data Scientist", "ML Engineer"]
+    elif "html" in skills_lower or "javascript" in skills_lower:
+        return ["Frontend Developer"]
+    elif "flask" in skills_lower or "python" in skills_lower:
+        return ["Backend Developer"]
+    elif "java" in skills_lower:
+        return ["Java Developer"]
+    else:
+        return ["Software Engineer"]
+
+
+# ----------- UPLOAD ROUTE -----------
+@app.route('/upload', methods=['POST'])
 def upload():
-    if "resume" not in request.files:
+    if 'resume' not in request.files:
         return jsonify({"error": "No file uploaded"}), 400
 
-    file = request.files["resume"]
+    file = request.files['resume']
 
-    if file.filename == "":
-        return jsonify({"error": "Empty filename"}), 400
+    if file.filename == '':
+        return jsonify({"error": "Empty file"}), 400
 
-    file_bytes = file.read()
-    text = extract_text_from_pdf(file_bytes)
+    # Save file
+    filepath = os.path.join(UPLOAD_FOLDER, file.filename)
+    file.save(filepath)
 
-    if not text.strip():
-        return jsonify({"error": "Could not extract text from PDF"}), 400
+    # Extract text
+    text = extract_text(filepath)
 
-    skills_found    = extract_skills(text)
-    jobs_recommended = recommend_jobs(skills_found)
+    # Extract skills
+    skills = extract_skills(text)
+
+    # Recommend jobs
+    jobs = recommend_jobs(skills)
 
     return jsonify({
-        "filename":      file.filename,
-        "skills_found":  skills_found,
-        "recommended_jobs": jobs_recommended
+        "filename": file.filename,
+        "skills_found": skills if skills else ["No skills detected"],
+        "recommended_jobs": jobs
     })
 
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000, debug=True)
+
+# ----------- RUN APP -----------
+if __name__ == '__main__':
+    app.run(debug=True)
