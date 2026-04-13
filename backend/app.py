@@ -16,10 +16,7 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 # ----------- HOME ROUTE -----------
 @app.route('/')
 def home():
-    try:
-        return send_from_directory(FRONTEND_DIR, 'index.html')
-    except:
-        return "Frontend not found", 200
+    return "OK", 200
 
 
 # ----------- PDF TEXT EXTRACTION -----------
@@ -35,6 +32,7 @@ def extract_text(filepath):
 
 # ----------- SKILL DETECTION -----------
 def extract_skills(text):
+    print("RUNNING UPDATED extract_skills")
     skills_db = [
         "python", "machine learning", "sql", "flask",
         "html", "css", "javascript", "react",
