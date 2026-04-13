@@ -1,5 +1,7 @@
 flask
+flask-cors
 PyPDF2
+selenium
+webdriver-manager
 pytest
 flake8
-flask-cors
