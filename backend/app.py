@@ -16,7 +16,7 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 # ----------- HOME ROUTE -----------
 @app.route('/')
 def home():
-    return "OK", 200
+    return "Resume Analyzer Running", 200
 
 
 # ----------- PDF TEXT EXTRACTION -----------
