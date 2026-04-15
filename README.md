@@ -28,23 +28,22 @@ The application is deployed on Render and accessible publicly.
 ## 🧱 Project Structure
 
 project/
-│
-├── backend/
-│   ├── app.py
-│   └── uploads/
-│
-├── frontend/
-│   └── index.html
-│
-├── tests/
-│   ├── test_selenium.py
-│   ├── test_app.py
-│   └── sample.pdf
-│
-├── requirements.txt
-├── Dockerfile
-├── Jenkinsfile
-└── README.md
+|
+|-- backend/
+|   |-- app.py
+|   |-- uploads/
+|
+|-- frontend/
+|   |-- index.html
+|
+|-- tests/
+|   |-- test_selenium.py
+|   |-- test_app.py
+|   |-- sample.pdf
+|
+|-- requirements.txt
+|-- Dockerfile
+|-- README.md
 
 ---
 
