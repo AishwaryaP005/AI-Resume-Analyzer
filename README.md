@@ -1,4 +1,4 @@
-# AI Resume Analyzer – CI/CD Pipeline Project
+# Resume Analyzer – CI/CD Pipeline Project
 
 ## 📌 Project Overview
 
